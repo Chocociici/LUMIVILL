@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'channels',
     'app0.chat',  # ← ИСПРАВЛЕНО: было 'chat', стало 'app0.chat'
     'rest_framework',
+    'app0.chat',
     'ckeditor',
     'ckeditor_uploader',
     'allauth',
