@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'chat'
+
 urlpatterns = [
     path('', views.chat_page, name='chat_page'),
     path('api/chat/users/', views.get_users_list, name='chat_users'),
