@@ -2,20 +2,22 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
-User = get_user_model()
-from .models import ChatRoom, ChatMessage, ChatBan
 from django.utils import timezone
 import random
 
+# Не импортируем модели здесь!
+# User = get_user_model() - тоже убираем отсюда
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        # Получаем пользователя безопасно
         self.user = self.scope['user']
         
         if not self.user.is_authenticated:
             await self.close()
             return
         
-        # Проверка бана
+        # Проверка бана (импорт внутри метода)
         is_banned = await self.is_user_banned()
         if is_banned:
             await self.close()
@@ -157,13 +159,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def is_user_banned(self):
-        ban = ChatBan.objects.filter(user=self.user).first()
-        if ban and (ban.expires_at is None or ban.expires_at > timezone.now()):
-            return True
-        return False
+        from .models import ChatBan  # Импорт внутри метода
+        return ChatBan.objects.filter(user=self.user).exists()
     
     @database_sync_to_async
     def get_recent_messages(self):
+        from .models import ChatRoom, ChatMessage  # Импорт внутри метода
         room, _ = ChatRoom.objects.get_or_create(room_type='public', defaults={'name': 'Общий чат'})
         messages = ChatMessage.objects.filter(room=room, is_deleted=False).order_by('-created_at')[:50]
         return [{
@@ -176,6 +177,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def save_message(self, text):
+        from .models import ChatRoom, ChatMessage  # Импорт внутри метода
         room, _ = ChatRoom.objects.get_or_create(room_type='public', defaults={'name': 'Общий чат'})
         message = ChatMessage.objects.create(
             room=room,
