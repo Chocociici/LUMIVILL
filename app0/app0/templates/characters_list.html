@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="text-align:center;">АНКЕТЫ</h1>
+{% for character in characters %}
+<div style="border:1px solid #c08060; padding:20px; margin:20px;">
+    <h2>{{ character.name }}</h2>
+    <p>Раса: {{ character.race }}</p>
+    <p>Автор: {{ character.author.username }}</p>
+    <p>Статус: {{ character.get_status_display }}</p>
+    <a href="{% url 'character_detail' character.pk %}">Подробнее</a>
+</div>
+{% empty %}
+<p>Нет анкет</p>
+{% endfor %}
+{% endblock %}

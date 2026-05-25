@@ -1,0 +1,92 @@
+{% extends 'base_inner.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="gothic-header">
+            ╭↼───↼·※·⇀───⇀╮<br>
+            ※ ВЫХОД ИЗ СИСТЕМЫ ※<br>
+            ╰↼───↼·※·⇀───⇀╯
+        </div>
+        
+        <p class="auth-text">Вы уверены, что хотите выйти из системы?</p>
+        
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <div class="auth-buttons">
+                <button type="submit" class="gothic-btn">🚪 ВЫЙТИ</button>
+                <a href="{% url 'home' %}" class="gothic-btn">❌ ОТМЕНА</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 40px 20px;
+    }
+    
+    .auth-box {
+        max-width: 450px;
+        width: 100%;
+        background: rgba(245, 235, 220, 0.95);
+        border: 2px solid #c08060;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .auth-text {
+        margin: 30px 0;
+        font-size: 16px;
+        color: #4a3a2e;
+        line-height: 1.6;
+    }
+    
+    .auth-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .gothic-btn {
+        background: linear-gradient(135deg, #d4a070, #c08060);
+        border: 2px solid #a06040;
+        color: #4a2a1a;
+        padding: 10px 25px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+        font-family: 'Special Elite', monospace;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .gothic-btn:hover {
+        background: linear-gradient(135deg, #c08060, #a06040);
+        color: #fdf0e0;
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 480px) {
+        .auth-box {
+            padding: 25px;
+        }
+        .auth-buttons {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .gothic-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

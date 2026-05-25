@@ -1,0 +1,129 @@
+{% extends 'base_inner.html' %}
+{% load static %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="gothic-header">
+            ╭↼───↼·※·⇀───⇀╮<br>
+            ※ ВХОД В СИСТЕМУ ※<br>
+            ╰↼───↼·※·⇀───⇀╯
+        </div>
+        
+        <form method="post" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            
+            <div class="form-field">
+                <label class="form-label">Имя пользователя</label>
+                <input type="text" name="login" class="form-control" required autofocus>
+            </div>
+            
+            <div class="form-field">
+                <label class="form-label">Пароль</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            
+            {% if form.errors %}
+            <div class="form-errors">
+                Неверное имя пользователя или пароль.
+            </div>
+            {% endif %}
+            
+            <div class="auth-buttons">
+                <button type="submit" class="gothic-btn">⚜ ВОЙТИ</button>
+            </div>
+        </form>
+        
+        <div class="auth-note">
+            <p>※ Доступ только по приглашению администрации ※</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 40px 20px;
+    }
+    
+    .auth-box {
+        max-width: 400px;
+        width: 100%;
+        background: rgba(245, 235, 220, 0.95);
+        border: 2px solid #c08060;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .form-field {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #5a3a2a;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        background: #fdf0e0;
+        border: 1px solid #c08060;
+        font-family: inherit;
+    }
+    
+    .form-errors {
+        color: #8B0000;
+        font-size: 14px;
+        margin-bottom: 15px;
+        padding: 8px;
+        background: rgba(139, 0, 0, 0.1);
+    }
+    
+    .auth-buttons {
+        margin-top: 25px;
+    }
+    
+    .auth-note {
+        margin-top: 25px;
+        padding-top: 15px;
+        border-top: 1px solid #c08060;
+        font-size: 12px;
+        color: #8a6a4a;
+    }
+    
+    .gothic-btn {
+        background: linear-gradient(135deg, #d4a070, #c08060);
+        border: 2px solid #a06040;
+        color: #4a2a1a;
+        padding: 10px 25px;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+        font-family: 'Special Elite', monospace;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .gothic-btn:hover {
+        background: linear-gradient(135deg, #c08060, #a06040);
+        color: #fdf0e0;
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 480px) {
+        .auth-box {
+            padding: 25px;
+        }
+    }
+</style>
+{% endblock %}

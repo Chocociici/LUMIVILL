@@ -1,0 +1,611 @@
+{% extends 'base_inner.html' %}
+{% load static %}
+
+{% block content %}
+<div class="chat-page-wrapper">
+    <div class="chat-wrapper" data-user-id="{{ user.id }}" data-username="{{ user.username }}" data-is-staff="{{ user.is_staff|lower }}">
+        <div class="chat-container">
+            <div class="chat-sidebar" id="chatSidebar">
+                <div class="sidebar-header">
+                    <span class="online-title">📡 ОНЛАЙН (<span id="onlineCount">0</span>)</span>
+                    <div class="sidebar-icons">
+                        <button class="icon-btn" id="rulesBtn">📜</button>
+                        <button class="icon-btn" id="adminsBtn">👑</button>
+                        <button class="icon-btn" id="settingsBtn">⚙️</button>
+                    </div>
+                </div>
+                <div id="usersList" class="users-list"></div>
+                <div class="sidebar-footer">
+                    <div class="current-user">
+                        <span class="user-name">👤 {{ user.username }}</span>
+                        <span class="user-role-badge">
+                            {% if user.is_staff %}👑 Админ{% else %}📜 Постоялец{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-main">
+                <div class="chat-header">
+                    <span>💬 ОБЩИЙ ЧАТ</span>
+                    <div class="chat-actions">
+                        <label class="icon-btn" for="fileInput">📷</label>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                        <label class="icon-btn" for="audioInput">🎙️</label>
+                        <input type="file" id="audioInput" accept="audio/*" hidden>
+                        <button id="recordBtn" class="icon-btn">🎤</button>
+                    </div>
+                </div>
+                
+                <div id="messages" class="chat-messages"></div>
+                
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Введите сообщение... (@ник для упоминания)" class="message-input">
+                    <button id="sendBtn" class="send-btn">📨</button>
+                    <button id="exitPrivateBtn" class="exit-private-btn" style="display:none;">✕ Выйти из ЛС</button>
+                </div>
+                <div id="typingIndicator" class="typing-indicator"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="burger-chat-btn" id="burgerChatBtn">
+    <span></span><span></span><span></span>
+</button>
+
+<!-- Модальные окна -->
+<div id="userProfileModal" class="modal">
+    <div class="modal-content">
+        <img id="profileAvatar" class="profile-avatar" src="/static/default-avatar.png">
+        <h3 id="profileUsername"></h3>
+        <p id="profileRole"></p>
+        <div class="modal-buttons">
+            <button id="profilePrivateBtn" class="modal-btn">💬 Написать в ЛС</button>
+            <button id="profileMentionBtn" class="modal-btn">@ Упомянуть</button>
+            <a id="profileLink" href="#" class="modal-btn">📜 Анкеты</a>
+            <div id="adminActions" style="display:none">
+                <button id="adminBanBtn" class="modal-btn admin-ban">🚫 Забанить</button>
+                <button id="adminUnbanBtn" class="modal-btn admin-unban">✅ Разбанить</button>
+            </div>
+            <button class="modal-btn" onclick="closeProfileModal()">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<div id="mentionModal" class="modal">
+    <div class="modal-content">
+        <h3>@ Упомянуть пользователей</h3>
+        <div id="mentionUsersList" class="users-list" style="max-height:200px"></div>
+        <input type="text" id="mentionMessageInput" placeholder="Сообщение..." class="message-input" style="margin:10px 0">
+        <button id="sendMentionBtn" class="send-btn">Отправить</button>
+        <button id="closeMentionModal" class="modal-btn" style="margin-top:10px">Закрыть</button>
+    </div>
+</div>
+
+<div id="rulesModal" class="modal">
+    <div class="modal-content">
+        <h3>📜 ПРАВИЛА ПРОЕКТА</h3>
+        <div class="rules-text">
+            <p><strong>⅟.</strong> Каждый игрок имеет право выбора взглядов при уважении прав других.</p>
+            <p><strong>½.</strong> Оскорбления разрешены лишь в дружеском контексте.</p>
+            <p><strong>⅓.</strong> Соблюдение ролевого этикета обязательно.</p>
+            <p><strong>¼.</strong> Использование "Н слова" запрещено.</p>
+            <p><strong>⅕.</strong> Конфликты должны переноситься в ЛС.</p>
+            <p><strong>⅙.</strong> Рофл разрешен лишь на НРП зоне.</p>
+            <p><strong>⅐.</strong> Спам запрещен под любым предлогом.</p>
+            <p><strong>⅛.</strong> Обсуждение политических взглядов запрещено.</p>
+        </div>
+        <button onclick="this.closest('.modal').style.display='none'">Понятно</button>
+    </div>
+</div>
+
+<div id="adminsModal" class="modal"><div class="modal-content"><h3>👑 АДМИНИСТРАЦИЯ</h3><p>ANGELINA - Главный администратор</p><p>admin - Администратор</p><button onclick="this.closest('.modal').style.display='none'">Закрыть</button></div></div>
+
+<div id="settingsModal" class="modal"><div class="modal-content"><h3>⚙️ НАСТРОЙКИ</h3><label>🔊 Звук уведомлений <input type="checkbox" id="soundToggle" checked></label><br><br><button onclick="this.closest('.modal').style.display='none'">Закрыть</button></div></div>
+
+<div id="recordingIndicator" class="recording-indicator">🔴 Запись... <span id="recordingTimer">0:00</span></div>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a1a;color:#f0f0f0;height:100vh;overflow:hidden}
+.chat-page-wrapper{height:100vh;overflow:hidden}
+.chat-wrapper{height:100vh;display:flex;flex-direction:column}
+.chat-container{display:flex;flex:1;width:100%;background:#1a1a1a;overflow:hidden;min-height:0}
+.chat-sidebar{width:280px;background:#2a2a2a;border-right:2px solid #ffcc00;display:flex;flex-direction:column;flex-shrink:0;height:100%;overflow-y:auto}
+.sidebar-header{display:flex;justify-content:space-between;align-items:center;padding:15px;color:#ffcc00;font-weight:bold;background:#2a2a2a;border-bottom:1px solid #3a3a3a;position:sticky;top:0;z-index:10}
+.online-title{font-size:15px}
+.sidebar-icons{display:flex;gap:8px}
+.icon-btn{background:none;border:none;font-size:18px;cursor:pointer;color:#ffcc00;padding:5px;transition:0.2s}
+.icon-btn:hover{background:rgba(255,204,0,0.2);border-radius:8px}
+.users-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:15px}
+.user-item{padding:10px 12px;background:#333;border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;position:relative}
+.user-item:hover{background:#444;transform:translateX(-3px)}
+.user-badge.admin{background:#ffcc00;color:#1a1a1a;font-weight:bold;padding:3px 8px;border-radius:20px;font-size:10px}
+.unread-badge{background:#ff4444;color:white;border-radius:50%;min-width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 4px;position:absolute;right:5px;top:5px}
+.sidebar-footer{padding:15px;border-top:1px solid #444;background:#2a2a2a}
+.current-user{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.user-role-badge{font-size:10px;padding:3px 10px;border-radius:20px;background:#ffcc00;color:#1a1a1a}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0;background:#1a1a1a;overflow:hidden}
+.chat-header{padding:15px 20px;border-bottom:1px solid #ffcc00;display:flex;justify-content:space-between;background:#222;color:#ffcc00;font-weight:bold;flex-shrink:0}
+.chat-actions{display:flex;gap:10px}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px}
+.message{display:flex}
+.message-bubble{max-width:70%;padding:10px 15px;border-radius:18px;background:#2a2a2a;word-wrap:break-word}
+.message-username{font-weight:bold;margin-right:10px;cursor:pointer}
+.message-username.admin{color:#ffcc00}
+.message-username.bot{color:#66ff66}
+.mention-highlight{background:rgba(255,204,0,0.4);padding:2px 4px;border-radius:6px;color:#ffcc00;font-weight:bold}
+.message-time{font-size:10px;color:#888;margin-left:10px}
+.message-image{max-width:200px;border-radius:8px;margin-top:5px;cursor:pointer;border:1px solid #ffcc00}
+.message-audio{width:200px;margin-top:5px}
+.private-message{border-left:3px solid #ffcc00;margin-left:20px}
+.system-msg{text-align:center;color:#ffcc00;font-style:italic;font-size:12px;padding:5px;background:rgba(255,204,0,0.1);border-radius:20px;margin:5px 0}
+.typing-indicator{padding:20px;font-size:12px;color:#ffcc00;text-align:center}
+.input-area{padding:45px 20px;border-top:1px solid #ffcc00;display:flex;gap:10px;background:#222;flex-shrink:0}
+.message-input{flex:1;padding:12px;background:#333;border:1px solid #ffcc00;border-radius:25px;color:#fff;outline:none}
+.send-btn{padding:12px 24px;background:#ffcc00;border:none;border-radius:25px;cursor:pointer;font-weight:bold;color:#1a1a1a}
+.send-btn:hover{transform:scale(1.05);background:#ffdd44}
+.exit-private-btn{padding:12px 24px;background:#ff6600;border:none;border-radius:25px;cursor:pointer;color:#fff}
+.sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999}
+.burger-chat-btn{display:none;position:fixed;top:75px;left:15px;z-index:1002;background:#2a2a2a;border:1px solid #ffcc00;border-radius:8px;cursor:pointer;width:40px;height:40px;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.burger-chat-btn span{display:block;width:22px;height:3px;background:#ffcc00;border-radius:3px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;z-index:2000}
+.modal-content{background:#2a2a2a;border:2px solid #ffcc00;border-radius:16px;max-width:90%;width:500px;padding:25px;text-align:center;max-height:80vh;overflow-y:auto}
+.rules-text{text-align:left;margin:15px 0}
+.rules-text p{margin-bottom:12px;font-size:13px}
+.profile-avatar{width:80px;height:80px;border-radius:50%;margin:10px auto;border:2px solid #ffcc00}
+.modal-buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:15px}
+.modal-btn{padding:8px 16px;background:#ffcc00;border:none;border-radius:20px;cursor:pointer;font-weight:bold}
+.admin-ban{background:#ff3333;color:white}
+.admin-unban{background:#33ff33;color:#1a1a1a}
+.recording-indicator{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#ff3333;color:white;padding:10px 20px;border-radius:30px;display:none;z-index:1000}
+.recording-indicator.active{display:flex;gap:10px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:768px){
+.chat-sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;transform:translateX(-100%);z-index:1001;border-right:2px solid #ffcc00;transition:transform 0.3s ease}
+.chat-sidebar.open{transform:translateX(0)}
+.sidebar-overlay.active{display:block}
+.burger-chat-btn{display:flex}
+.chat-main{width:100%}
+.input-area{padding:10px 15px}
+.send-btn{padding:10px 18px}
+.chat-header{padding:12px 15px;padding-left:65px}
+.message-bubble{max-width:85%}
+}
+@media (max-width:480px){
+.message-bubble{max-width:90%}
+.chat-sidebar{width:260px}
+}
+</style>
+
+<script>
+const username = "{{ user.username }}";
+const userId = parseInt(document.querySelector('.chat-wrapper').dataset.userId);
+const isStaff = document.querySelector('.chat-wrapper').dataset.isStaff === 'true';
+let ws = null;
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+let currentPrivateWith = null;
+let usersList = [];
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingTimer = null;
+let selectedMentions = [];
+let unreadCounts = {};
+
+document.getElementById('soundToggle').checked = soundEnabled;
+
+// Звук для уведомлений
+let notificationSound = null;
+function initSound() {
+    notificationSound = new Audio('/static/chat/audio/mau.mp3');
+    notificationSound.volume = 0.5;
+    notificationSound.load();
+}
+function playNotificationSound() {
+    if (!soundEnabled) return;
+    if (notificationSound) {
+        notificationSound.currentTime = 0;
+        notificationSound.play().catch(e => console.log('Sound error:', e));
+    }
+}
+
+// Бургер-меню
+const burgerBtn = document.getElementById('burgerChatBtn');
+const sidebar = document.getElementById('chatSidebar');
+const overlay = document.getElementById('sidebarOverlay');
+if (burgerBtn) {
+    burgerBtn.onclick = () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    };
+}
+if (overlay) {
+    overlay.onclick = () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+}
+window.onresize = () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+};
+
+function getCookie(name) {
+    let value = null;
+    if (document.cookie) {
+        for (let part of document.cookie.split(';')) {
+            const [key, val] = part.trim().split('=');
+            if (key === name) value = decodeURIComponent(val);
+        }
+    }
+    return value;
+}
+
+async function loadUserSettings() {
+    try {
+        const res = await fetch('/api/chat/settings/');
+        if (res.ok) {
+            const settings = await res.json();
+            soundEnabled = settings.sound_enabled;
+            document.getElementById('soundToggle').checked = soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+        }
+    } catch(e) {}
+}
+async function saveSoundSetting(enabled) {
+    try {
+        await fetch('/api/chat/settings/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({ sound_enabled: enabled })
+        });
+    } catch(e) {}
+}
+
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+}
+function showNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        new Notification(title, { body: body, icon: '/static/favicon.ico' });
+    }
+}
+
+function markAsRead(fromUser) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'mark_read', username: username, from_user: fromUser }));
+    }
+    if (unreadCounts[fromUser]) delete unreadCounts[fromUser];
+    updateUnreadUI();
+}
+
+function updateUnreadUI() {
+    document.querySelectorAll('.user-item').forEach(item => {
+        const userName = item.querySelector('span:first-child')?.innerText;
+        const badge = item.querySelector('.unread-badge');
+        if (userName && unreadCounts[userName] && unreadCounts[userName] > 0) {
+            if (!badge) {
+                const b = document.createElement('span');
+                b.className = 'unread-badge';
+                item.appendChild(b);
+            }
+            item.querySelector('.unread-badge').textContent = unreadCounts[userName] > 9 ? '9+' : unreadCounts[userName];
+        } else if (badge) badge.remove();
+    });
+}
+
+function connectWebSocket() {
+    ws = new WebSocket('ws://127.0.0.1:3001');
+    ws.onopen = () => ws.send(JSON.stringify({ type: 'join', username, userId, isStaff }));
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        
+        if (data.type === 'history') {
+            data.messages.forEach(msg => {
+                if (msg.type === 'message') addMessage(msg.username, msg.text, msg.timestamp, msg.role);
+                else if (msg.type === 'bot') addMessage(msg.username, msg.text, msg.timestamp, 'bot');
+                else if (msg.type === 'image') addImageMessage(msg.username, msg.url, msg.timestamp, msg.role);
+                else if (msg.type === 'audio') addAudioMessage(msg.username, msg.url, msg.timestamp, msg.role);
+                else if (msg.type === 'private') addPrivateMessage(msg.from, msg.text, msg.timestamp);
+                else if (msg.type === 'system') addSystemMessage(msg.text);
+            });
+        }
+        
+        if (data.type === 'unread_update') {
+            unreadCounts = data.unread || {};
+            updateUnreadUI();
+        }
+        
+        if (data.type === 'message') {
+            addMessage(data.username, data.text, data.timestamp, data.role);
+        }
+        
+        if (data.type === 'private') {
+            addPrivateMessage(data.from, data.text, data.timestamp);
+            if (data.from !== username && currentPrivateWith !== data.from) {
+                unreadCounts[data.from] = (unreadCounts[data.from] || 0) + 1;
+                updateUnreadUI();
+                playNotificationSound();
+                if (document.hidden) {
+                    showNotification('Новое личное сообщение', `${data.from}: ${data.text.substring(0, 50)}`);
+                }
+            }
+        }
+        
+        if (data.type === 'mention_notify') {
+            addSystemMessage(`🔔 ${data.from} упомянул вас в чате: "${data.text.substring(0, 50)}"`);
+            playNotificationSound(); // ЗВУК ПРИ УПОМИНАНИИ
+            unreadCounts[data.from] = (unreadCounts[data.from] || 0) + 1;
+            updateUnreadUI();
+            if (document.hidden) {
+                document.title = '🔔 Новое упоминание!';
+                showNotification('Новое упоминание', `${data.from} упомянул вас`);
+                setTimeout(() => { if(document.title === '🔔 Новое упоминание!') document.title = 'Чат'; }, 5000);
+            }
+        }
+        
+        if (data.type === 'users') {
+            usersList = data.users;
+            updateUsers(data.users);
+            document.getElementById('onlineCount').textContent = data.users.length;
+        }
+        
+        if (data.type === 'system') addSystemMessage(data.text);
+        if (data.type === 'bot') addMessage('Добрая Вискаша', data.text, data.timestamp, 'bot');
+        if (data.type === 'image') addImageMessage(data.username, data.url, data.timestamp, data.role);
+        if (data.type === 'audio') addAudioMessage(data.username, data.url, data.timestamp, data.role);
+    };
+    ws.onclose = () => {
+        addSystemMessage('🔴 Потеря соединения, переподключение...');
+        setTimeout(connectWebSocket, 3000);
+    };
+}
+
+function addMessage(user, text, time, role) {
+    const messagesDiv = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message';
+    let formattedText = escapeHtml(text);
+    const onlineNames = usersList.map(u => u.username);
+    formattedText = formattedText.replace(/@(\w+)/g, (match, mention) => {
+        if (onlineNames.includes(mention) || mention === username) {
+            return `<span class="mention-highlight">@${mention}</span>`;
+        }
+        return match;
+    });
+    div.innerHTML = `
+        <div class="message-bubble">
+            <div>
+                <span class="message-username ${role}" onclick="showUserProfile('${escapeHtml(user)}')">${escapeHtml(user)}</span>
+                ${role === 'admin' ? '👑' : role === 'bot' ? '🤖' : ''}
+                <span class="message-time">${new Date(time).toLocaleTimeString()}</span>
+                <button class="icon-btn" onclick="sendPrivateTo('${escapeHtml(user)}')" style="font-size:12px;margin-left:10px">💬</button>
+                <button class="icon-btn" onclick="openMentionModal('${escapeHtml(user)}')" style="font-size:12px">@</button>
+            </div>
+            <div>${formattedText}</div>
+        </div>
+    `;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function addImageMessage(user, url, time, role) {
+    const div = document.createElement('div');
+    div.className = 'message';
+    div.innerHTML = `<div class="message-bubble"><div><span class="message-username ${role}" onclick="showUserProfile('${escapeHtml(user)}')">${escapeHtml(user)}</span><span class="message-time">${new Date(time).toLocaleTimeString()}</span><button class="icon-btn" onclick="sendPrivateTo('${escapeHtml(user)}')" style="font-size:12px;margin-left:10px">💬</button><button class="icon-btn" onclick="openMentionModal('${escapeHtml(user)}')" style="font-size:12px">@</button></div><img src="${url}" class="message-image" onclick="window.open('${url}','_blank')"></div>`;
+    document.getElementById('messages').appendChild(div);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function addAudioMessage(user, url, time, role) {
+    const div = document.createElement('div');
+    div.className = 'message';
+    div.innerHTML = `<div class="message-bubble"><div><span class="message-username ${role}" onclick="showUserProfile('${escapeHtml(user)}')">${escapeHtml(user)}</span><span class="message-time">${new Date(time).toLocaleTimeString()}</span><button class="icon-btn" onclick="sendPrivateTo('${escapeHtml(user)}')" style="font-size:12px;margin-left:10px">💬</button><button class="icon-btn" onclick="openMentionModal('${escapeHtml(user)}')" style="font-size:12px">@</button></div><audio controls src="${url}" class="message-audio"></audio></div>`;
+    document.getElementById('messages').appendChild(div);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function addPrivateMessage(from, text, time) {
+    const div = document.createElement('div');
+    div.className = 'message private-message';
+    div.innerHTML = `<div class="message-bubble" style="background:#ffcc00;color:#1a1a1a"><div><span>🔒 Приват от ${escapeHtml(from)}</span><span class="message-time">${new Date(time).toLocaleTimeString()}</span><button class="icon-btn" onclick="markAsReadAndReply('${escapeHtml(from)}')" style="font-size:12px;margin-left:10px">✅ Прочитано</button></div><div>${escapeHtml(text)}</div></div>`;
+    document.getElementById('messages').appendChild(div);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    if (currentPrivateWith === from) markAsRead(from);
+}
+
+function markAsReadAndReply(fromUser) {
+    markAsRead(fromUser);
+    sendPrivateTo(fromUser);
+}
+
+function addSystemMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'system-msg';
+    div.textContent = text;
+    document.getElementById('messages').appendChild(div);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function updateUsers(users) {
+    const usersDiv = document.getElementById('usersList');
+    usersDiv.innerHTML = users.map(u => `
+        <div class="user-item" onclick="showUserProfile('${escapeHtml(u.username)}')">
+            <span>${escapeHtml(u.username)}</span>
+            ${u.role === 'admin' ? '<span class="user-badge admin">👑</span>' : ''}
+        </div>
+    `).join('');
+    updateUnreadUI();
+}
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text || !ws) return;
+    if (currentPrivateWith) {
+        ws.send(JSON.stringify({ type: 'private', to: currentPrivateWith, text, from: username }));
+        addPrivateMessage(`Вы -> ${currentPrivateWith}`, text, new Date().toISOString());
+        exitPrivateMode();
+    } else {
+        ws.send(JSON.stringify({ type: 'message', text, username }));
+    }
+    input.value = '';
+    input.focus();
+}
+
+function sendPrivateTo(user) {
+    currentPrivateWith = user;
+    document.getElementById('messageInput').placeholder = `💬 Приват для ${user}...`;
+    document.getElementById('exitPrivateBtn').style.display = 'inline-block';
+    document.getElementById('messageInput').focus();
+    markAsRead(user);
+}
+
+function exitPrivateMode() {
+    currentPrivateWith = null;
+    document.getElementById('messageInput').placeholder = 'Введите сообщение... (@ник для упоминания)';
+    document.getElementById('exitPrivateBtn').style.display = 'none';
+}
+
+function uploadFile(file, type) {
+    if (!ws) return;
+    const reader = new FileReader();
+    reader.onload = (e) => ws.send(JSON.stringify({ type, username, data: e.target.result, name: file.name }));
+    reader.readAsDataURL(file);
+}
+
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/mp3' });
+            uploadFile(new File([blob], `voice_${Date.now()}.mp3`, { type: 'audio/mp3' }), 'audio');
+            stream.getTracks().forEach(t => t.stop());
+        };
+        mediaRecorder.start();
+        document.getElementById('recordingIndicator').classList.add('active');
+        let seconds = 0;
+        recordingTimer = setInterval(() => {
+            seconds++;
+            document.getElementById('recordingTimer').textContent = `${Math.floor(seconds/60)}:${(seconds%60).toString().padStart(2,'0')}`;
+        }, 1000);
+    } catch(e) { addSystemMessage('❌ Нет доступа к микрофону'); }
+}
+function stopRecording() {
+    if (mediaRecorder?.state === 'recording') {
+        mediaRecorder.stop();
+        clearInterval(recordingTimer);
+        document.getElementById('recordingIndicator').classList.remove('active');
+    }
+}
+
+async function showUserProfile(targetUser) {
+    try {
+        const res = await fetch(`/api/chat/profile/${targetUser}/`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById('profileUsername').textContent = data.username;
+        document.getElementById('profileRole').textContent = data.is_staff ? 'Администратор' : 'Пользователь';
+        document.getElementById('profileLink').href = data.profile_url;
+        document.getElementById('profilePrivateBtn').onclick = () => { sendPrivateTo(data.username); closeProfileModal(); };
+        document.getElementById('profileMentionBtn').onclick = () => { closeProfileModal(); openMentionModal(data.username); };
+        const adminDiv = document.getElementById('adminActions');
+        if (isStaff && data.username !== username && !data.is_staff) {
+            adminDiv.style.display = 'block';
+            document.getElementById('adminBanBtn').onclick = () => adminAction('ban', data.username);
+            document.getElementById('adminUnbanBtn').onclick = () => adminAction('unban', data.username);
+        } else adminDiv.style.display = 'none';
+        document.getElementById('userProfileModal').style.display = 'flex';
+    } catch(e) { addSystemMessage('❌ Ошибка загрузки профиля'); }
+}
+
+async function adminAction(action, target) {
+    try {
+        const res = await fetch('/api/chat/admin-action/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ action, target })
+        });
+        const data = await res.json();
+        addSystemMessage(data.status === 'ok' ? `✅ ${data.message}` : `❌ ${data.error}`);
+        if (data.status === 'ok' && ws) ws.send(JSON.stringify({ type: 'refresh_users' }));
+    } catch(e) { addSystemMessage('❌ Ошибка'); }
+    closeProfileModal();
+}
+
+function openMentionModal(preSelected = null) {
+    selectedMentions = preSelected ? [preSelected] : [];
+    document.getElementById('mentionUsersList').innerHTML = usersList.map(u => `
+        <div class="user-item" onclick="toggleMention('${escapeHtml(u.username)}')">
+            <span>${escapeHtml(u.username)}</span>
+            <span id="mention_check_${escapeHtml(u.username)}">${selectedMentions.includes(u.username) ? '✅' : '⬜'}</span>
+        </div>
+    `).join('');
+    document.getElementById('mentionModal').style.display = 'flex';
+    document.getElementById('mentionMessageInput').value = '';
+}
+function toggleMention(user) {
+    const idx = selectedMentions.indexOf(user);
+    if (idx === -1) selectedMentions.push(user);
+    else selectedMentions.splice(idx, 1);
+    const span = document.getElementById(`mention_check_${user}`);
+    if (span) span.textContent = selectedMentions.includes(user) ? '✅' : '⬜';
+}
+function closeProfileModal() { document.getElementById('userProfileModal').style.display = 'none'; }
+function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+
+document.getElementById('sendMentionBtn').onclick = () => {
+    const text = document.getElementById('mentionMessageInput').value.trim();
+    if (selectedMentions.length && text && ws) {
+        ws.send(JSON.stringify({ type: 'mention', from: username, targets: selectedMentions, text }));
+        document.getElementById('mentionModal').style.display = 'none';
+        addSystemMessage(`✅ Упомянуты: ${selectedMentions.join(', ')}`);
+    }
+};
+document.getElementById('closeMentionModal').onclick = () => document.getElementById('mentionModal').style.display = 'none';
+
+document.getElementById('fileInput').onchange = e => { if (e.target.files[0]) uploadFile(e.target.files[0], 'image'); e.target.value = ''; };
+document.getElementById('audioInput').onchange = e => { if (e.target.files[0]) uploadFile(e.target.files[0], 'audio'); e.target.value = ''; };
+let recording = false;
+document.getElementById('recordBtn').onclick = () => {
+    if (!recording) { startRecording(); recording = true; document.getElementById('recordBtn').style.color = '#ff3333'; }
+    else { stopRecording(); recording = false; document.getElementById('recordBtn').style.color = '#ffcc00'; }
+};
+document.getElementById('sendBtn').onclick = sendMessage;
+document.getElementById('exitPrivateBtn').onclick = exitPrivateMode;
+document.getElementById('messageInput').onkeypress = e => { if (e.key === 'Enter') sendMessage(); };
+document.getElementById('rulesBtn').onclick = () => document.getElementById('rulesModal').style.display = 'flex';
+document.getElementById('adminsBtn').onclick = () => document.getElementById('adminsModal').style.display = 'flex';
+document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').style.display = 'flex';
+document.getElementById('soundToggle').onchange = () => {
+    soundEnabled = document.getElementById('soundToggle').checked;
+    localStorage.setItem('soundEnabled', soundEnabled);
+    saveSoundSetting(soundEnabled);
+};
+document.querySelectorAll('.modal').forEach(m => { m.onclick = e => { if(e.target === m) m.style.display = 'none'; }; });
+
+initSound();
+loadUserSettings();
+connectWebSocket();
+requestNotificationPermission();
+
+window.sendPrivateTo = sendPrivateTo;
+window.showUserProfile = showUserProfile;
+window.closeProfileModal = closeProfileModal;
+window.openMentionModal = openMentionModal;
+window.toggleMention = toggleMention;
+window.markAsReadAndReply = markAsReadAndReply;
+</script>
+{% endblock %}

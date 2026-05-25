@@ -1,0 +1,557 @@
+{% extends 'base_inner.html' %}
+{% load static %}
+
+{% block content %}
+<div class="catalog-container">
+    <!-- Кнопка для открытия правил -->
+    <div class="rules-toggle-wrapper">
+        <button class="rules-toggle-btn" id="rulesToggleBtn">
+            <span class="rules-icon">📜</span>
+            <span class="rules-text">ПРАВИЛА ПРОЕКТА</span>
+            <span class="rules-arrow">▼</span>
+        </button>
+    </div>
+    
+    <!-- Выдвижной блок с правилами -->
+    <div class="rules-slide" id="rulesSlide">
+        <div class="rules-content">
+            <div class="rules-header">
+                <span class="rules-title">⟡⟬♖ ОГРАНИЧЕНИЯ ПЕРСОНАЖЕЙ ♙⟭⟡</span>
+                <button class="rules-close" id="rulesCloseBtn">✕</button>
+            </div>
+            
+            <div class="rules-body">
+                <div class="rule-item">
+                    <span class="rule-number">2.1</span>
+                    <div class="rule-text">
+                        <strong>Рост персонажа.</strong> Человек: 70-220 см; Нечисть, автоматоны: 30-300 см. 
+                        Если персонаж превышает/уступает норме и объяснение этому не входит в рамки РП, 
+                        администрация в праве занизить/повысить рост персонажа.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.2</span>
+                    <div class="rule-text">
+                        <strong>Стилистика РП.</strong> Каждый персонаж должен подходить под стилистику РП. 
+                        Киберпанк или персонаж из современного мира не будет расценен как подходящий, 
+                        и администрация попросит изменить вид/лор персонажа ближе к событиям РП.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.3</span>
+                    <div class="rule-text">
+                        <strong>Роллы и логика.</strong> Понятие "прибавок/убавок к роллу" отсутствует. 
+                        Нелогичные действия персонажа с высоким роллом могут быть причиной для жалобы 
+                        в администрацию. Пример: человек не может бежать с привычной скоростью при 
+                        поврежденных ногах.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.4</span>
+                    <div class="rule-text">
+                        <strong>Запрет на сью.</strong> Любые виды сью на РП строго запрещены, сью действия 
+                        также запрещены. Последствием станет страйк.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.5</span>
+                    <div class="rule-text">
+                        <strong>Способности.</strong> Максимальное количество способностей — 3. Оружие и 
+                        артефакты, наделяющие способностями, также учитываются. Игроки обязаны обговорить 
+                        каждую способность с администрацией. Большее количество может быть разрешено только 
+                        с анкетой персонажа.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.6</span>
+                    <div class="rule-text">
+                        <strong>Запрещённые способности:</strong> Стихийная магия, регенерация, контроль над 
+                        временем, непробиваемая защита, изменение материи, телекинез.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.7</span>
+                    <div class="rule-text">
+                        <strong>Запрещённые расы:</strong> Ангелы, демоны, драконы, химеры, инопланетяне, 
+                        призраки, персонифицированные стихии, нежить, путешественники во времени. 
+                        <em>(Каждая из рас может быть одобрена после обсуждения с администрацией с внесением 
+                        честных корректировок)</em>
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.8</span>
+                    <div class="rule-text">
+                        <strong>Косплеи.</strong> Должны быть разрешены администрацией и могут быть приняты 
+                        только если персонаж подходит под стилистику и временной период РП. Пример: Ирен Адлер, 
+                        Эркюль Пуаро, Жюль Верн.
+                    </div>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-number">2.9</span>
+                    <div class="rule-text">
+                        <strong>Возрастные ограничения.</strong> Для персонажей младше 18 лет любые ЭРП (18+ РП) 
+                        посты полностью запрещены. При выявлении нарушений — пожизненный бан. Персонажи младше 
+                        14 лет также запрещены.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rules-footer">
+                <span class="rules-warning">⚠️ Нарушение правил влечёт за собой страйки и блокировки ⚠️</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="catalog-header">
+        <div class="gothic-header">
+            ╭↼───↼·※·⇀───⇀╮<br>
+            ※ КАТАЛОГ АНКЕТ ※<br>
+            ╰↼───↼·※·⇀───⇀╯
+        </div>
+        
+        {% if user.is_authenticated %}
+        <div class="create-btn-wrapper">
+            <a href="{% url 'create_character' %}" class="gothic-btn">➕ СОЗДАТЬ АНКЕТУ</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="catalog-grid">
+        {% for character in page_obj %}
+        <div class="character-card">
+            <a href="{% url 'character_detail' character.id %}" class="card-link">
+                <div class="card-image-wrapper">
+                    {% if character.main_image %}
+                    <img src="{{ character.main_image.url }}" alt="{{ character.name }}" class="card-image">
+                    {% else %}
+                    <div class="card-image-placeholder">❓</div>
+                    {% endif %}
+                </div>
+                <div class="card-info">
+                    <h3 class="card-name">{{ character.name }}</h3>
+                    <p class="card-race">🐾 {{ character.race }}</p>
+                    <p class="card-age">📅 {{ character.age }}</p>
+                    <p class="card-author">👤 {{ character.author.username }}</p>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="empty-catalog">
+            <p>※ НЕТ СОЗДАННЫХ АНКЕТ ※</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1" class="gothic-btn-small">« Первая</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="gothic-btn-small">‹ Назад</a>
+        {% endif %}
+        
+        <span class="current-page">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="gothic-btn-small">Вперед ›</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="gothic-btn-small">Последняя »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .catalog-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+    }
+    
+    /* Стили для кнопки правил */
+    .rules-toggle-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+    
+    .rules-toggle-btn {
+        background: linear-gradient(135deg, #2a1a10, #1a0a05);
+        border: 2px solid #c08060;
+        border-radius: 40px;
+        padding: 12px 25px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        font-family: 'Special Elite', monospace;
+        font-size: 14px;
+        color: #daa520;
+        letter-spacing: 1px;
+    }
+    
+    .rules-toggle-btn:hover {
+        border-color: #daa520;
+        background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .rules-icon {
+        font-size: 20px;
+    }
+    
+    .rules-arrow {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    .rules-toggle-btn.active .rules-arrow {
+        transform: rotate(180deg);
+    }
+    
+    /* Выдвижной блок с правилами */
+    .rules-slide {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out;
+        margin-bottom: 30px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #2a1a10, #1a0f08);
+        border: 2px solid #c08060;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .rules-slide.open {
+        max-height: 800px;
+        transition: max-height 0.6s ease-in;
+    }
+    
+    .rules-content {
+        padding: 25px;
+        color: #f5e6d0;
+    }
+    
+    .rules-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #c08060;
+    }
+    
+    .rules-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #daa520;
+        font-family: 'Special Elite', monospace;
+        letter-spacing: 2px;
+    }
+    
+    .rules-close {
+        background: none;
+        border: none;
+        color: #c08060;
+        font-size: 24px;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 5px;
+    }
+    
+    .rules-close:hover {
+        color: #daa520;
+    }
+    
+    .rules-body {
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+    
+    .rules-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .rules-body::-webkit-scrollbar-track {
+        background: #2a1a10;
+        border-radius: 3px;
+    }
+    
+    .rules-body::-webkit-scrollbar-thumb {
+        background: #c08060;
+        border-radius: 3px;
+    }
+    
+    .rule-item {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 18px;
+        padding: 10px;
+        background: rgba(255,245,235,0.05);
+        border-left: 3px solid #daa520;
+        transition: all 0.2s;
+    }
+    
+    .rule-item:hover {
+        background: rgba(255,245,235,0.1);
+        transform: translateX(5px);
+    }
+    
+    .rule-number {
+        font-weight: bold;
+        color: #daa520;
+        font-family: 'Special Elite', monospace;
+        font-size: 18px;
+        min-width: 45px;
+    }
+    
+    .rule-text {
+        line-height: 1.5;
+        font-size: 14px;
+        color: #e8d8c8;
+    }
+    
+    .rule-text strong {
+        color: #daa520;
+    }
+    
+    .rule-text em {
+        color: #c0a080;
+        font-size: 13px;
+    }
+    
+    .rules-footer {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #c08060;
+        text-align: center;
+    }
+    
+    .rules-warning {
+        font-size: 12px;
+        color: #ff8866;
+        font-family: 'Special Elite', monospace;
+        letter-spacing: 1px;
+    }
+    
+    /* Остальные стили */
+    .catalog-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .gothic-header {
+        font-family: 'Special Elite', monospace;
+        color: #daa520;
+        font-size: 18px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+    }
+    
+    .gothic-btn {
+        background: linear-gradient(135deg, #8a5a3a, #6a4a2a);
+        border: none;
+        padding: 12px 30px;
+        color: #fdf0e0;
+        text-decoration: none;
+        font-family: 'Special Elite', monospace;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-block;
+    }
+    
+    .gothic-btn:hover {
+        background: linear-gradient(135deg, #9a6a4a, #7a5a3a);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .catalog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 30px;
+    }
+    
+    .character-card {
+        background: rgba(255, 245, 235, 0.95);
+        border: 2px solid #c08060;
+        transition: all 0.3s;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .character-card:hover {
+        transform: translateY(-5px);
+        border-color: #daa520;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    .card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .card-image-wrapper {
+        height: 250px;
+        overflow: hidden;
+    }
+    
+    .card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .character-card:hover .card-image {
+        transform: scale(1.05);
+    }
+    
+    .card-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: #2a1a10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: #daa520;
+    }
+    
+    .card-info {
+        padding: 15px;
+    }
+    
+    .card-name {
+        font-size: 18px;
+        color: #5a3a2a;
+        margin-bottom: 8px;
+        font-family: 'Special Elite', monospace;
+    }
+    
+    .card-race, .card-age, .card-author {
+        font-size: 13px;
+        color: #6a4a3a;
+        margin: 5px 0;
+    }
+    
+    .empty-catalog {
+        text-align: center;
+        padding: 80px;
+        background: rgba(245, 235, 220, 0.7);
+        border: 1px solid #c08060;
+        grid-column: 1 / -1;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 40px;
+    }
+    
+    .gothic-btn-small {
+        background: linear-gradient(135deg, #8a5a3a, #6a4a2a);
+        border: none;
+        color: #fdf0e0;
+        padding: 8px 20px;
+        text-decoration: none;
+        font-family: 'Special Elite', monospace;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .gothic-btn-small:hover {
+        background: linear-gradient(135deg, #9a6a4a, #7a5a3a);
+        transform: translateY(-1px);
+    }
+    
+    .current-page {
+        padding: 8px 20px;
+        background: rgba(200, 128, 96, 0.3);
+        border: 1px solid #c08060;
+        color: #5a3a2a;
+        font-family: 'Special Elite', monospace;
+    }
+    
+    @media (max-width: 768px) {
+        .catalog-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .card-image-wrapper {
+            height: 200px;
+        }
+        
+        .rules-title {
+            font-size: 16px;
+        }
+        
+        .rule-item {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .rules-toggle-btn {
+            padding: 8px 18px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+<script>
+    // JavaScript для выдвижного блока правил
+    const rulesToggleBtn = document.getElementById('rulesToggleBtn');
+    const rulesSlide = document.getElementById('rulesSlide');
+    const rulesCloseBtn = document.getElementById('rulesCloseBtn');
+    
+    function openRules() {
+        rulesSlide.classList.add('open');
+        rulesToggleBtn.classList.add('active');
+    }
+    
+    function closeRules() {
+        rulesSlide.classList.remove('open');
+        rulesToggleBtn.classList.remove('active');
+    }
+    
+    if (rulesToggleBtn) {
+        rulesToggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (rulesSlide.classList.contains('open')) {
+                closeRules();
+            } else {
+                openRules();
+            }
+        });
+    }
+    
+    if (rulesCloseBtn) {
+        rulesCloseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeRules();
+        });
+    }
+    
+    // Закрытие при клике вне блока (опционально)
+    document.addEventListener('click', function(e) {
+        if (rulesSlide && rulesSlide.classList.contains('open')) {
+            if (!rulesSlide.contains(e.target) && !rulesToggleBtn.contains(e.target)) {
+                closeRules();
+            }
+        }
+    });
+</script>
+{% endblock %}

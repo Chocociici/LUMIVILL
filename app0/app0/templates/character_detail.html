@@ -1,0 +1,470 @@
+{% extends 'base_inner.html' %}
+{% load static %}
+
+{% block content %}
+<div class="character-detail">
+    <div class="character-header">
+        <div class="gothic-header">
+            ╭↼───↼·※·⇀───⇀╮<br>
+            ※ АНКЕТА ПЕРСОНАЖА ※<br>
+            ╰↼───↼·※·⇀───⇀╯
+        </div>
+    </div>
+    
+    <div class="character-main">
+        <div class="character-image">
+            {% if character.main_image %}
+            <img src="{{ character.main_image.url }}" alt="{{ character.name }}">
+            {% else %}
+            <div class="no-image">❓ Изображение отсутствует</div>
+            {% endif %}
+        </div>
+        
+        <div class="character-info">
+            <h1 class="character-name">{{ character.name }}</h1>
+            <div class="character-meta">
+                <span class="meta-status {{ character.status }}">{{ character.get_status_display }}</span>
+                <span class="meta-date">📅 Создана: {{ character.created_at|date:"d.m.Y H:i" }}</span>
+                <span class="meta-author">👤 Автор: <a href="{% url 'profile' character.author.username %}">{{ character.author.username }}</a></span>
+            </div>
+            
+            <div class="character-stats">
+                <div class="stat-item"><strong>Возраст:</strong> {{ character.age }}</div>
+                <div class="stat-item"><strong>Пол:</strong> {{ character.gender }}</div>
+                {% if character.height_weight %}
+                <div class="stat-item"><strong>Рост/Вес:</strong> {{ character.height_weight }}</div>
+                {% endif %}
+                <div class="stat-item"><strong>Раса:</strong> {{ character.race }}</div>
+                {% if character.faction %}
+                <div class="stat-item"><strong>Фракция:</strong> {{ character.faction }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="character-sections">
+        <div class="section">
+            <div class="section-title">※ Внешность ※</div>
+            <div class="section-content">{{ character.appearance|linebreaks }}</div>
+        </div>
+        
+        {% if character.personality %}
+        <div class="section">
+            <div class="section-title">※ Характер ※</div>
+            <div class="section-content">{{ character.personality|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.occupation %}
+        <div class="section">
+            <div class="section-title">※ Профессия/Роль ※</div>
+            <div class="section-content">{{ character.occupation|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.combat_skills %}
+        <div class="section">
+            <div class="section-title">※ Боевые навыки ※</div>
+            <div class="section-content">{{ character.combat_skills|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.racial_abilities %}
+        <div class="section">
+            <div class="section-title">※ Расовые способности ※</div>
+            <div class="section-content">{{ character.racial_abilities|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.magic %}
+        <div class="section">
+            <div class="section-title">※ Магия ※</div>
+            <div class="section-content">{{ character.magic|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.inventory %}
+        <div class="section">
+            <div class="section-title">※ Инвентарь ※</div>
+            <div class="section-content">{{ character.inventory|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.documents %}
+        <div class="section">
+            <div class="section-title">※ Документы ※</div>
+            <div class="section-content">{{ character.documents|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.weaknesses %}
+        <div class="section">
+            <div class="section-title">※ Слабости ※</div>
+            <div class="section-content">{{ character.weaknesses|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.biography %}
+        <div class="section">
+            <div class="section-title">※ Биография ※</div>
+            <div class="section-content">{{ character.biography|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if character.music %}
+        <div class="section">
+            <div class="section-title">※ Музыка ※</div>
+            <div class="section-content">
+                <audio controls class="audio-player">
+                    <source src="{{ character.music.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудио.
+                </audio>
+            </div>
+        </div>
+        {% endif %}
+        
+       {% if character.pony_town_skin %}
+<div class="section">
+    <div class="section-title">※ Скин в Pony Town ※</div>
+    <div class="section-content">
+        <img src="{{ character.pony_town_skin.url }}" alt="Скин" class="skin-image">
+    </div>
+</div>
+{% endif %}
+
+{% if character.voice_link %}
+<div class="section">
+    <div class="section-title">※ Голос ※</div>
+    <div class="section-content">
+        <audio controls class="audio-player">
+            <source src="{{ character.voice_link.url }}" type="audio/mpeg">
+            Ваш браузер не поддерживает аудио.
+        </audio>
+    </div>
+</div>
+{% endif %}
+
+{% if character.art_link %}
+<div class="section">
+    <div class="section-title">※ Референсы/Арты ※</div>
+    <div class="section-content">
+        <img src="{{ character.art_link.url }}" alt="Арт" class="art-image">
+    </div>
+</div>
+{% endif %}
+    </div>
+    
+    <!-- Галерея изображений -->
+    {% if character.character_images.all %}
+    <div class="gallery-section">
+        <div class="section-title">※ Галерея ※</div>
+        <div class="gallery-grid">
+            {% for img in character.character_images.all %}
+            <div class="gallery-item">
+                <img src="{{ img.image.url }}" alt="{{ img.title|default:'Изображение' }}" onclick="openModal(this.src)">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Комментарии -->
+    <div class="comments-section">
+        <div class="section-title">※ Комментарии ※</div>
+        
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'add_comment' character.id %}" class="comment-form">
+            {% csrf_token %}
+            <textarea name="text" placeholder="Ваш комментарий..." rows="3" required class="comment-input"></textarea>
+            <button type="submit" class="gothic-btn-small">📝 Отправить</button>
+        </form>
+        {% else %}
+        <p class="comment-login">※ <a href="/accounts/login/">Войдите</a> чтобы оставить комментарий ※</p>
+        {% endif %}
+        
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment-item">
+                <div class="comment-header">
+                    <span class="comment-author">👤 {{ comment.author.username }}</span>
+                    <span class="comment-date">📅 {{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                    {% if user == comment.author or user.is_staff %}
+                    <a href="{% url 'delete_comment' comment.id %}" class="comment-delete" onclick="return confirm('Удалить комментарий?')">🗑️</a>
+                    {% endif %}
+                </div>
+                <div class="comment-text">{{ comment.text|linebreaks }}</div>
+            </div>
+            {% empty %}
+            <p class="no-comments">※ Пока нет комментариев ※</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Кнопки действий -->
+   <div class="action-buttons">
+    <a href="{% url 'catalog' %}" class="gothic-btn">← Назад к каталогу</a>
+    {% if user == character.author %}
+    <a href="{% url 'edit_character' character.id %}" class="gothic-btn">✏️ Редактировать</a>
+    <a href="{% url 'delete_character' character.id %}" class="gothic-btn delete-btn" onclick="return confirm('Вы уверены, что хотите удалить эту анкету? Это действие нельзя отменить.')">🗑️ Удалить</a>
+    {% endif %}
+</div>
+</div>
+
+<style>
+    .delete-btn {
+    background: linear-gradient(135deg, #8B0000, #5a0000);
+    border-color: #8B0000;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(135deg, #a00000, #6a0000);
+}
+    .character-detail {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        background: rgba(245, 235, 220, 0.92);
+        border: 1px solid #c08060;
+    }
+    
+    .character-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .character-main {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .character-image {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .character-image img {
+        width: 100%;
+        height: auto;
+        border: 2px solid #c08060;
+    }
+    
+    .no-image {
+        width: 100%;
+        height: 200px;
+        background: #2a1a10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #daa520;
+    }
+    
+    .character-info {
+        flex: 2;
+    }
+    
+    .character-name {
+        font-size: 28px;
+        color: #5a3a2a;
+        font-family: 'Cinema Decorative', serif;
+        margin-bottom: 15px;
+    }
+    
+    .character-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .meta-status {
+        padding: 3px 10px;
+        background: rgba(0,0,0,0.5);
+    }
+    
+    .meta-status.pending { color: #8B7355; }
+    .meta-status.approved { color: #DAA520; }
+    .meta-status.declined { color: #8B0000; }
+    
+    .meta-author a {
+        color: #c08060;
+        text-decoration: none;
+    }
+    
+    .character-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        background: rgba(200, 128, 96, 0.1);
+        padding: 15px;
+    }
+    
+    .section {
+        margin-bottom: 30px;
+        border-top: 1px solid #c08060;
+        padding-top: 20px;
+    }
+    
+    .section-title {
+        font-size: 20px;
+        color: #c08060;
+        font-family: 'Cinema Decorative', serif;
+        margin-bottom: 15px;
+    }
+    
+    .section-content {
+        line-height: 1.7;
+        color: #4a3a2e;
+    }
+    
+    .audio-player {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .gallery-item {
+        cursor: pointer;
+        overflow: hidden;
+    }
+    
+    .gallery-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .gallery-item img:hover {
+        transform: scale(1.05);
+    }
+    
+    .comments-section {
+        margin-top: 30px;
+        border-top: 1px solid #c08060;
+        padding-top: 20px;
+    }
+    
+    .comment-form {
+        margin: 20px 0;
+    }
+    
+    .comment-input {
+        width: 100%;
+        padding: 10px;
+        background: #fdf0e0;
+        border: 1px solid #c08060;
+        font-family: inherit;
+        margin-bottom: 10px;
+    }
+    
+    .comment-list {
+        margin-top: 20px;
+    }
+    
+    .comment-item {
+        background: rgba(255, 245, 235, 0.8);
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 3px solid #c08060;
+    }
+    
+    .comment-header {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+        font-size: 12px;
+        color: #8a6a4a;
+        flex-wrap: wrap;
+    }
+    
+    .comment-author {
+        font-weight: bold;
+        color: #c08060;
+    }
+    
+    .comment-delete {
+        color: #8B0000;
+        text-decoration: none;
+        margin-left: auto;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .gothic-btn-small {
+        background: linear-gradient(135deg, #8a5a3a, #6a4a2a);
+        border: none;
+        color: #fdf0e0;
+        padding: 8px 20px;
+        text-decoration: none;
+        font-family: 'Special Elite', monospace;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-block;
+    }
+    
+    .gothic-btn-small:hover {
+        background: linear-gradient(135deg, #c08060, #a06040);
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+        .character-main {
+            flex-direction: column;
+        }
+        .character-image {
+            text-align: center;
+        }
+        .character-image img {
+            max-width: 300px;
+        }
+        .character-stats {
+            grid-template-columns: 1fr;
+        }
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+    }
+</style>
+
+<script>
+    function openModal(src) {
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.background = 'rgba(0,0,0,0.9)';
+        modal.style.zIndex = '1000';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.onclick = function() { this.remove(); };
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.maxWidth = '90%';
+        img.style.maxHeight = '90%';
+        img.style.border = '2px solid #c08060';
+        
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+    }
+</script>
+{% endblock %}

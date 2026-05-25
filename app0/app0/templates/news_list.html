@@ -1,0 +1,636 @@
+{% extends 'base_inner.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #fdf0e0;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .news-page {
+        background-color: #efd3cf;
+        min-height: 100vh;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    /* Левая лента */
+    .news-page .left-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200px;
+        height: 100vh;
+        z-index: 10;
+        pointer-events: none;
+    }
+    
+    .news-page .left-frame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/news-ramka-back.png');
+        background-repeat: repeat-y;
+        background-position: left center;
+        background-size: 200px auto;
+        animation: scrollUp 20s linear infinite;
+    }
+    
+    /* Правая лента */
+    .news-page .right-wrapper {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 100vh;
+        z-index: 10;
+        pointer-events: none;
+    }
+    
+    .news-page .right-frame {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/news-ramka-back-2.png');
+        background-repeat: repeat-y;
+        background-position: right center;
+        background-size: 200px auto;
+        animation: scrollDown 20s linear infinite;
+    }
+    
+    /* Облака - только в верхней части */
+    .cloud-layer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 45%;
+        z-index: 25;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    
+    /* Контейнеры для бесконечных облаков */
+    .cloud-line-1, .cloud-line-2 {
+        position: absolute;
+        left: 0;
+        white-space: nowrap;
+        will-change: transform;
+    }
+    
+    .cloud-line-1 {
+        animation: moveLeftToRight 60s linear infinite;
+    }
+    
+    .cloud-line-2 {
+        animation: moveRightToLeft 65s linear infinite;
+    }
+    
+    .cloud-line-1 img, .cloud-line-2 img {
+        width: auto;
+        display: inline-block;
+        opacity: 0.8;
+    }
+    
+    /* Падающие дирижабли */
+    .falling-airship {
+        position: fixed;
+        z-index: 24;
+        pointer-events: none;
+        animation: fallDown linear infinite;
+        opacity: 0.2;
+        transform-origin: center;
+        top: -100px;
+        width: 45px;
+    }
+    
+    /* Бесконечная анимация облаков - облака дублируются */
+    @keyframes moveLeftToRight {
+        0% {
+            transform: translateX(0%);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+    
+    @keyframes moveRightToLeft {
+        0% {
+            transform: translateX(-50%);
+        }
+        100% {
+            transform: translateX(0%);
+        }
+    }
+    
+    @keyframes fallDown {
+        0% {
+            top: -100px;
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.2;
+        }
+        50% {
+            opacity: 0.25;
+        }
+        85% {
+            opacity: 0.15;
+        }
+        100% {
+            top: 110%;
+            opacity: 0;
+        }
+    }
+    
+    /* Контент */
+    .news-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 30;
+        padding: 40px 220px;
+    }
+    
+    .title-frame {
+           background-image: url('/static/RAMKA NEWS.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-color: transparent;  /* ← добавь эту строку */
+    text-align: center;
+    padding: 60px 20px;
+    margin-bottom: 50px;
+    position: relative;
+    z-index: 30;
+    }
+    
+    .title-frame .gothic-header {
+        display: inline-block;
+    padding: 15px 30px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #5a3a2a;
+    font-family: 'Cinema Decorative', serif;
+    background: transparent;  /* ← убедись что здесь transparent, а не белый */
+    }
+    
+    .news-card {
+        display: flex;
+        gap: 30px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid #c08060;
+        padding: 25px;
+        margin-bottom: 35px;
+        transition: transform 0.2s ease;
+        position: relative;
+        z-index: 30;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .news-image {
+        flex: 0 0 280px;
+        max-width: 100%;
+    }
+    
+    .news-image img {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        min-height: 180px;
+        max-height: 220px;
+        object-fit: cover;
+        border: 1px solid #c08060;
+    }
+    
+    .news-content {
+        flex: 1;
+    }
+    
+    .news-date {
+        color: #c08060;
+        font-size: 14px;
+        margin-bottom: 10px;
+        font-family: monospace;
+    }
+    
+    .news-title {
+        color: #5a3a2a;
+        margin-bottom: 15px;
+        font-size: 24px;
+        font-family: 'Cinema Decorative', serif;
+    }
+    
+    .news-short {
+        color: #4a3a2e;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    .empty-news {
+        text-align: center;
+        padding: 60px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid #c08060;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+        padding-bottom: 40px;
+    }
+    
+    .gothic-btn-small {
+        background: linear-gradient(135deg, #d4a070, #c08060);
+        border: 1px solid #a06040;
+        color: #4a2a1a;
+        padding: 8px 20px;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-family: 'Special Elite', monospace;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .gothic-btn-small:hover {
+        background: linear-gradient(135deg, #c08060, #a06040);
+        color: #fdf0e0;
+    }
+    
+    .current-page {
+        padding: 8px 20px;
+        background: rgba(200, 128, 96, 0.3);
+        border: 1px solid #c08060;
+        color: #5a3a2a;
+    }
+    
+    footer {
+        position: relative;
+        z-index: 30;
+        background: #fdf0e0;
+    }
+    
+    @keyframes scrollUp {
+        0% { background-position: left 0; }
+        100% { background-position: left 200px; }
+    }
+    
+    @keyframes scrollDown {
+        0% { background-position: right 0; }
+        100% { background-position: right 200px; }
+    }
+    
+    /* ===== АДАПТИВ ===== */
+    
+    @media (min-width: 1920px) {
+        .cloud-line-1 { top: 50px; }
+        .cloud-line-2 { top: 220px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 200px; margin: 0 -5px; }
+        .falling-airship { width: 50px; }
+    }
+    
+    @media (max-width: 1919px) and (min-width: 1600px) {
+        .cloud-line-1 { top: 45px; }
+        .cloud-line-2 { top: 200px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 180px; margin: 0 -5px; }
+        .falling-airship { width: 45px; }
+    }
+    
+    @media (max-width: 1599px) and (min-width: 1400px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 160px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 160px auto; }
+        .news-container { padding: 40px 180px; }
+        .cloud-line-1 { top: 40px; }
+        .cloud-line-2 { top: 180px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 160px; margin: 0 -5px; }
+        .falling-airship { width: 42px; }
+        .title-frame .gothic-header { font-size: 22px; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 160px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 160px; }
+        }
+    }
+    
+    @media (max-width: 1399px) and (min-width: 1200px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 150px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 150px auto; }
+        .news-container { padding: 40px 170px; }
+        .cloud-line-1 { top: 35px; }
+        .cloud-line-2 { top: 160px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 140px; margin: 0 -5px; }
+        .falling-airship { width: 40px; }
+        .title-frame .gothic-header { font-size: 21px; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 150px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 150px; }
+        }
+    }
+    
+    @media (max-width: 1199px) and (min-width: 992px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 130px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 130px auto; }
+        .news-container { padding: 40px 150px; }
+        .news-image { flex: 0 0 220px; }
+        .cloud-line-1 { top: 30px; }
+        .cloud-line-2 { top: 140px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 120px; margin: 0 -5px; }
+        .falling-airship { width: 38px; }
+        .title-frame .gothic-header { font-size: 20px; }
+        .title-frame { padding: 50px 15px; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 130px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 130px; }
+        }
+    }
+    
+    @media (max-width: 991px) and (min-width: 768px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 100px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 100px auto; }
+        .news-container { padding: 30px 120px; }
+        .news-image { flex: 0 0 200px; }
+        .cloud-line-1 { top: 25px; }
+        .cloud-line-2 { top: 110px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 100px; margin: 0 -5px; }
+        .falling-airship { width: 35px; }
+        .title-frame .gothic-header { font-size: 18px; }
+        .title-frame { padding: 40px 12px; }
+        .news-title { font-size: 20px; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 100px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 100px; }
+        }
+    }
+    
+    @media (max-width: 767px) and (min-width: 576px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 70px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 70px auto; }
+        .news-container { padding: 20px 90px; }
+        .title-frame { padding: 30px 10px; }
+        .title-frame .gothic-header { font-size: 14px; }
+        .news-card { flex-direction: column; }
+        .news-image { flex: 0 0 auto; width: 100%; }
+        .news-image img { max-height: 220px; }
+        .cloud-line-1 { top: 20px; }
+        .cloud-line-2 { top: 90px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 85px; margin: 0 -5px; }
+        .falling-airship { width: 30px; opacity: 0.12; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 70px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 70px; }
+        }
+    }
+    
+    @media (max-width: 575px) and (min-width: 480px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 55px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 55px auto; }
+        .news-container { padding: 20px 75px; }
+        .title-frame .gothic-header { font-size: 12px; }
+        .title-frame { padding: 25px 8px; }
+        .news-title { font-size: 16px; }
+        .cloud-line-1 { top: 15px; }
+        .cloud-line-2 { top: 75px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 70px; margin: 0 -5px; }
+        .falling-airship { width: 28px; opacity: 0.1; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 55px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 55px; }
+        }
+    }
+    
+    @media (max-width: 479px) {
+        .news-page .left-wrapper,
+        .news-page .right-wrapper { width: 40px; }
+        .news-page .left-frame,
+        .news-page .right-frame { background-size: 40px auto; }
+        .news-container { padding: 15px 55px; }
+        .title-frame .gothic-header { font-size: 10px; }
+        .title-frame { padding: 20px 6px; }
+        .cloud-line-1 { top: 10px; }
+        .cloud-line-2 { top: 60px; }
+        .cloud-line-1 img, .cloud-line-2 img { height: 55px; margin: 0 -5px; }
+        .falling-airship { width: 25px; opacity: 0.08; }
+        @keyframes scrollUp {
+            0% { background-position: left 0; }
+            100% { background-position: left 40px; }
+        }
+        @keyframes scrollDown {
+            0% { background-position: right 0; }
+            100% { background-position: right 40px; }
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="news-page">
+    <!-- Левая лента -->
+    <div class="left-wrapper">
+        <div class="left-frame"></div>
+    </div>
+    
+    <!-- Правая лента -->
+    <div class="right-wrapper">
+        <div class="right-frame"></div>
+    </div>
+    
+    <!-- Облака - бесконечные, без разрывов -->
+    <div class="cloud-layer">
+        <!-- Линия облаков 1 - слева направо (бесконечно) -->
+        <div class="cloud-line-1">
+            <!-- Первая копия облаков -->
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <!-- Дубликат для бесконечности -->
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+        </div>
+        
+        <!-- Линия облаков 2 - справа налево (бесконечно) -->
+        <div class="cloud-line-2">
+            <!-- Первая копия облаков -->
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <!-- Дубликат для бесконечности -->
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+            <img src="/static/oblacko-2.png">
+            <img src="/static/oblacko-1.png">
+        </div>
+    </div>
+    
+    <!-- Падающие дирижабли -->
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 3%; animation-duration: 14s; animation-delay: -0s; transform: rotate(-8deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 12%; animation-duration: 16s; animation-delay: -2s; transform: rotate(10deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 21%; animation-duration: 12s; animation-delay: -5s; transform: rotate(-15deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 30%; animation-duration: 18s; animation-delay: -8s; transform: rotate(12deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 39%; animation-duration: 13s; animation-delay: -3s; transform: rotate(-6deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 48%; animation-duration: 15s; animation-delay: -7s; transform: rotate(8deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 57%; animation-duration: 11s; animation-delay: -4s; transform: rotate(-20deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 66%; animation-duration: 17s; animation-delay: -9s; transform: rotate(15deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 75%; animation-duration: 13s; animation-delay: -6s; transform: rotate(-5deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 84%; animation-duration: 15s; animation-delay: -1s; transform: rotate(6deg);">
+    <img src="/static/airsheep-sticker.png" class="falling-airship" style="left: 93%; animation-duration: 12s; animation-delay: -10s; transform: rotate(-12deg);">
+    
+    <div class="news-container">
+        <div class="title-frame">
+            <div class="gothic-header">
+                ╭↼───↼·※·⇀───⇀╮<br>
+                ※ НОВОСТИ ПРОЕКТА ※<br>
+                ╰↼───↼·※·⇀───⇀╯
+            </div>
+        </div>
+        
+        {% for news in news_list %}
+        <div class="news-card fade-on-scroll">
+            {% if news.image %}
+            <div class="news-image">
+                <img src="{{ news.image.url }}" alt="{{ news.title }}" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="news-content">
+                <div class="news-date">📅 {{ news.date|date:"d.m.Y" }}</div>
+                <h2 class="news-title">{{ news.title }}</h2>
+                <p class="news-short">{{ news.short_description|truncatechars:120 }}</p>
+                <a href="{% url 'news_detail' news.pk %}" class="gothic-btn">Подробнее →</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-news">
+            <p>※ Пока нет новостей ※</p>
+            <p>↼·↼☬╾☾·※·☽╼☬⇀·⇀·</p>
+        </div>
+        {% endfor %}
+        
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="gothic-btn-small">« Первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="gothic-btn-small">‹ Предыдущая</a>
+            {% endif %}
+            <span class="current-page">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="gothic-btn-small">Следующая ›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="gothic-btn-small">Последняя »</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

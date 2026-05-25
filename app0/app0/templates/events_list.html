@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="text-align:center;">ИВЕНТЫ</h1>
+{% for event in events_list %}
+<div style="border:1px solid #c08060; padding:20px; margin:20px;">
+    <h2>{{ event.title }}</h2>
+    <p>{{ event.short_description }}</p>
+    <a href="{% url 'event_detail' event.pk %}">Подробнее</a>
+</div>
+{% empty %}
+<p>Нет ивентов</p>
+{% endfor %}
+{% endblock %}

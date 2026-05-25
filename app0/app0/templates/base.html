@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>{% block title %}LUMIVILLE — Industrial Gothic{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinema+Decorative:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fdf0e0;
+            color: #4a3a2e;
+            font-family: 'Special Elite', 'Cinema Decorative', 'Playfair Display', monospace;
+        }
+
+        /* ===== ГЛАВНЫЙ ЭКРАН ===== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            background: #fdf0e0;
+            overflow: hidden;
+        }
+
+        /* Фоновое изображение links.png */
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/links.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        /* Затемнение */
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                rgba(200, 160, 120, 0.2) 0%,
+                rgba(180, 140, 100, 0.1) 50%,
+                rgba(200, 170, 130, 0.05) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Рамка front-ramka.png */
+        .hero-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/front-ramka.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* admin-art.png - на всю высоту, скрывается при 800px */
+        .hero-admin {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 45%;
+            height: 100%;
+            background-image: url('/static/admin-art.png');
+            background-repeat: no-repeat;
+            background-position: right center;
+            background-size: cover;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        /* При ширине 800px и меньше - admin-art полностью скрыт */
+        @media (max-width: 800px) {
+            .hero-admin {
+                display: none;
+            }
+        }
+
+        /* Контент с текстом */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 60px 5%;
+        }
+
+        .hero-text {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 245, 235, 0.92);
+            padding: 40px;
+            border-left: 5px solid #c08060;
+            border-right: 2px solid #c08060;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            backdrop-filter: blur(2px);
+        }
+
+        /* ===== АДАПТИВ ===== */
+        
+        @media (max-width: 1024px) {
+            .hero-admin { width: 50%; background-size: cover; }
+        }
+
+        @media (max-width: 800px) {
+            .hero-content {
+                justify-content: center;
+                text-align: center;
+            }
+            .hero-text {
+                max-width: 90%;
+                margin: 0 auto;
+            }
+            .hero-frame {
+                background-size: 95%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-content { padding: 40px 5%; }
+            .hero-text { padding: 25px; max-width: 95%; }
+            .hero-frame { background-size: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content { padding: 30px 4%; }
+            .hero-text { padding: 20px; }
+        }
+
+        @media (max-width: 360px) {
+            .hero-content { padding: 20px 3%; }
+            .hero-text { padding: 15px; }
+            .hero-bg { background-size: 150%; background-position: 30% center; }
+            .hero-frame { background-size: 110%; background-position: 50% 40%; }
+        }
+
+        .decorative-stars {
+            position: fixed;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #c08060;
+            letter-spacing: 4px;
+            z-index: 100;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        @media (max-width: 768px) {
+            .decorative-stars { font-size: 12px; letter-spacing: 2px; top: 10px; }
+        }
+        @media (max-width: 480px) {
+            .decorative-stars { font-size: 10px; letter-spacing: 1px; top: 8px; }
+        }
+
+        /* Текст */
+        .gothic-title {
+            font-family: 'Cinema Decorative', 'Playfair Display', serif;
+            font-size: clamp(28px, 6vw, 56px);
+            font-weight: 900;
+            background: linear-gradient(135deg, #8a5a3a, #6a4a2a, #5a3a1a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .gothic-subtitle {
+            font-size: clamp(14px, 3vw, 22px);
+            color: #5a3a2a;
+            margin: 10px 0 20px 0;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .gothic-quote-text {
+            font-size: clamp(12px, 2.5vw, 17px);
+            line-height: 1.6;
+            color: #4a2a1a;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .color-text {
+            font-weight: bold;
+            color: #c08060;
+        }
+
+        /* Кнопки */
+        .gothic-btn {
+            background: linear-gradient(135deg, #d4a070, #c08060);
+            border: 2px solid #a06040;
+            color: #4a2a1a;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            font-family: 'Special Elite', monospace;
+            font-weight: bold;
+            padding: 12px 30px;
+            font-size: 16px;
+            margin: 0 10px 0 0;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .gothic-btn { padding: 8px 20px; font-size: 14px; margin: 5px; }
+        }
+        @media (max-width: 480px) {
+            .gothic-btn { padding: 6px 15px; font-size: 12px; }
+        }
+        .gothic-btn:hover {
+            background: linear-gradient(135deg, #c08060, #a06040);
+            color: #fdf0e0;
+            transform: translateY(-2px);
+        }
+
+        .hero-buttons {
+            margin-top: 30px;
+        }
+        @media (max-width: 768px) {
+            .hero-buttons { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+            .gothic-btn { margin: 0; width: 80%; }
+        }
+
+        /* Переход */
+        .gradient-transition {
+            height: 80px;
+            background: linear-gradient(to bottom, rgba(253,240,224,0) 0%, #fdf0e0 100%);
+            position: relative;
+            z-index: 20;
+        }
+
+        /* ===== ПАТТЕРН ===== */
+        .main-content {
+            background: #fdf0e0;
+            position: relative;
+            z-index: 20;
+        }
+
+        .pattern-bg {
+            background-color: #fef5ec;
+            padding: 60px 20px;
+            position: relative;
+            background-image: url('/static/fontan.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+
+        .pattern-bg::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, 
+                transparent 10%,
+                rgba(254, 245, 236, 0.4) 35%,
+                #fef5ec 70%,
+                #fef5ec 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        @media (max-width: 1200px) { .pattern-bg { background-size: 85%; } }
+        @media (max-width: 992px) { 
+            .pattern-bg { background-size: 90%; padding: 50px 15px; }
+            .pattern-bg::before {
+                background: radial-gradient(ellipse at center, 
+                    transparent 5%,
+                    rgba(254, 245, 236, 0.5) 30%,
+                    #fef5ec 75%);
+            }
+        }
+        @media (max-width: 768px) { 
+            .pattern-bg { background-size: 95%; padding: 40px 12px; }
+        }
+        @media (max-width: 480px) { 
+            .pattern-bg { background-size: 100%; padding: 30px 10px; }
+        }
+
+        .pattern-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Табы */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) { .tabs { gap: 15px; } }
+        @media (max-width: 480px) { .tabs { gap: 10px; } }
+
+        .tab-btn {
+            background: linear-gradient(135deg, #8a5a3a, #6a4a2a);
+            border: none;
+            color: #fdf0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Cinema Decorative', serif;
+            letter-spacing: 1px;
+            font-weight: bold;
+            padding: 12px 30px;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 768px) {
+            .tab-btn { padding: 8px 16px; font-size: 14px; }
+        }
+        @media (max-width: 480px) {
+            .tab-btn { padding: 6px 12px; font-size: 12px; }
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: linear-gradient(135deg, #c08060, #a06040);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            max-width: 950px;
+            margin: 0 auto;
+            text-align: center;
+            background: rgba(245, 235, 220, 0.95);
+            border: 1px solid #c08060;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 40px;
+        }
+        @media (max-width: 768px) { .tab-content { padding: 25px; } }
+        @media (max-width: 480px) { .tab-content { padding: 20px; } }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .fade-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        footer {
+            background: #fdf0e0;
+            border-top: 2px solid #c08060;
+            text-align: center;
+            padding: 40px;
+            font-size: 14px;
+            color: #8a6a4a;
+        }
+        @media (max-width: 768px) { footer { padding: 30px; font-size: 12px; } }
+        @media (max-width: 480px) { footer { padding: 20px; font-size: 10px; } }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="decorative-stars">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</div>
+
+    <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-frame"></div>
+        <div class="hero-admin"></div>
+
+        <div class="hero-content fade-in">
+            <div class="hero-text">
+                <div class="gothic-title">⟬ LUMIVILLE ⟭</div>
+                <div class="gothic-subtitle">WELCOME TO THE INDUSTRIAL GOTHIC</div>
+                
+                <div class="gothic-quote-text">
+                    ⟬Конец XIX века. На западе Бельгии расположился промышленный город <span class="color-text">Люмивиль</span>, встречающий каждого парящими дирижаблями и пьянящими танцами кабаре, после которого дамы срывают горло, а мужчины печень.⟭
+                    <br><br>
+                    Доп.Инф: <span class="color-text">@Babene_babene</span>
+                </div>
+                
+                <div class="hero-buttons">
+                    <a href="#main" class="gothic-btn" id="detailsBtn">Подробнее</a>
+                    <a href="https://t.me/LumivilleRP" class="gothic-btn">Перейти в канал</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gradient-transition"></div>
+
+    <div id="main" class="main-content">
+        <div class="pattern-bg">
+            <div class="pattern-content">
+                <div class="tabs fade-on-scroll">
+                    <a href="{% url 'news_list' %}" class="tab-btn">📰 НОВОСТИ</a>
+                    <a href="{% url 'characters_list' %}" class="tab-btn">📜 АНКЕТЫ</a>
+                  
+<a href="/chat/" class="gothic-btn">💬 Чат</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' user.username %}" class="tab-btn">👤 ПРОФИЛЬ</a>
+                        <a href="/accounts/logout/" class="tab-btn">🚪 ВЫХОД</a>
+                    {% else %}
+                        <a href="/accounts/login/" class="tab-btn">⚜ ВХОД</a>
+                        
+                    {% endif %}
+                </div>
+
+                <div class="tab-content active fade-on-scroll" id="tab-tavern">
+                    <p style="color: #c08060;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+                    <p style="margin: 25px 0; line-height: 1.7; color: #4a3a2e; font-size: clamp(14px, 2.5vw, 18px);">
+                        <span class="color-text" style="font-size: clamp(18px, 3.5vw, 22px);">⟬ Ролевой проект Люмивиль выходит на причал ⟭</span><br><br>
+                        успейте насладиться ролевым опытом на нашем проекте, так как набор продлиться всего <span class="color-text">пол часа</span>.<br>
+                        Наборное время: <span class="color-text">16:50-17:20 по мск</span>.
+                    </p>
+                    <p style="margin: 35px 0; line-height: 1.7; color: #4a3a2e; font-size: clamp(14px, 2.5vw, 18px);">
+                        Голос из радио передает о переходе города к Весне.<br>
+                        <span class="color-text">16 °C</span>, Церковный парк открывает свои врата, птицы возвращаются к гнёздам,<br>
+                        а садовники уже принялись высаживать цветущие <span class="color-text">розы</span>.<br>
+                        Берегитесь сосулек! Резкое потепление может буквально ударить в голову!
+                    </p>
+                    <p style="color: #c08060;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+                </div>
+
+                <div class="tab-content fade-on-scroll" id="tab-characters">
+                    <p style="color: #c08060;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+                    <p style="margin: 25px 0; font-size: clamp(18px, 3.5vw, 22px); color: #4a3a2e; font-weight: bold;">※ КАТАЛОГ АНКЕТ ※</p>
+                    <p style="margin: 25px 0; font-size: clamp(14px, 2.5vw, 18px);">↼·↼☬╾☾·※·☽╼☬⇀·⇀·</p>
+                    <a href="{% url 'characters_list' %}" class="gothic-btn" style="margin-top: 20px;">Перейти в каталог</a>
+                    <p style="margin-top: 25px; color: #c08060;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+                </div>
+
+                <div class="tab-content fade-on-scroll" id="tab-rp">
+                    <p style="color: #c08060;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+                    <p style="margin: 25px 0; font-size: clamp(18px, 3.5vw, 22px); color: #4a3a2e; font-weight: bold;">※ ОБУЧЕНИЕ РОЛЕВОЙ ИГРЕ ※</p>
+                    <p style="margin: 25px 0; font-size: clamp(14px, 2.5vw, 18px);">·-☬-· Изучите законы постояльца:</p>
+                    <a href="https://vk.com/topic-217139830_55105379" class="gothic-btn" style="margin-top: 10px;">Закон постояльца</a>
+                    <p style="margin-top: 25px; color: #c08060;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="fade-on-scroll">
+            <p>:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+            <p style="margin: 10px 0;">LUMIVILLE — Industrial Gothic</p>
+            <p>↼·↼☬╾☾·※·☽╼☬⇀·⇀·</p>
+            <p style="margin-top: 10px;">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+        </footer>
+    </div>
+
+    <script>
+        const fadeElements = document.querySelectorAll('.fade-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    entry.target.classList.remove('hiding');
+                } else {
+                    entry.target.classList.add('hiding');
+                    entry.target.classList.remove('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+        fadeElements.forEach(el => observer.observe(el));
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        const detailsBtn = document.getElementById('detailsBtn');
+        if (detailsBtn) {
+            detailsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

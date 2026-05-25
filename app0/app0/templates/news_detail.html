@@ -1,0 +1,91 @@
+{% extends 'base_inner.html' %}
+
+{% block content %}
+<div class="news-detail-container">
+    <div class="news-detail">
+        <div class="news-detail-header">
+            <div class="gothic-header">
+                ╭↼───↼·※·⇀───⇀╮
+            </div>
+            <h1 class="news-detail-title">{{ news_item.title }}</h1>
+            <div class="news-detail-date">📅 {{ news_item.date|date:"d.m.Y H:i" }}</div>
+            {% if news_item.image %}
+            <div class="news-detail-image">
+                <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="news-detail-content">
+            {{ news_item.full_text|safe }}
+        </div>
+        
+        <div class="news-detail-footer">
+            <div class="gothic-header">
+                ↼·↼☬╾☾·※·☽╼☬⇀·⇀·
+            </div>
+            <a href="{% url 'news_list' %}" class="gothic-btn">← Назад к новостям</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .news-detail-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .news-detail {
+        background: rgba(245, 235, 220, 0.92);
+        border: 1px solid #c08060;
+        padding: 40px;
+    }
+    
+    .news-detail-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #c08060;
+        padding-bottom: 20px;
+    }
+    
+    .news-detail-title {
+        font-size: 36px;
+        color: #5a3a2a;
+        margin: 20px 0 10px;
+    }
+    
+    .news-detail-date {
+        color: #c08060;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    
+    .news-detail-image img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #c08060;
+    }
+    
+    .news-detail-content {
+        line-height: 1.8;
+        color: #4a3a2e;
+        font-size: 16px;
+    }
+    
+    .news-detail-footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #c08060;
+    }
+    
+    @media (max-width: 768px) {
+        .news-detail {
+            padding: 20px;
+        }
+        .news-detail-title {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LUMIVILLE — Industrial Gothic{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinema+Decorative:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fdf0e0;
+            color: #4a3a2e;
+            font-family: 'Special Elite', 'Cinema Decorative', 'Playfair Display', monospace;
+        }
+
+        .decorative-stars {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #c08060;
+            letter-spacing: 4px;
+            z-index: 100;
+            pointer-events: none;
+            font-family: monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Навигация */
+        nav {
+            background: rgba(255, 245, 235, 0.95);
+            border-bottom: 2px solid #c08060;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+
+        nav a {
+            color: #5a3a2a;
+            text-decoration: none;
+            margin: 0 20px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: color 0.3s;
+            font-family: 'Cinema Decorative', serif;
+        }
+
+        nav a:hover {
+            color: #c08060;
+        }
+
+        /* Контент */
+        .content {
+            min-height: calc(100vh - 200px);
+           
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Подвал */
+        footer {
+            background: #fdf0e0;
+            border-top: 2px solid #c08060;
+            padding: 40px;
+            text-align: center;
+            color: #8a6a4a;
+            font-size: 14px;
+        }
+
+        .gothic-btn {
+            background: linear-gradient(135deg, #d4a070, #c08060);
+            border: 2px solid #a06040;
+            color: #4a2a1a;
+            padding: 12px 35px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            font-family: 'Special Elite', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .gothic-btn:hover {
+            background: linear-gradient(135deg, #c08060, #a06040);
+            color: #fdf0e0;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            nav a {
+                margin: 0 10px;
+                font-size: 14px;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="decorative-stars">:･ﾟ✧:･.☽｡･ﾟ✧:･.:</div>
+
+    <nav>
+        <a href="{% url 'home' %}">🏰 ГЛАВНАЯ</a>
+        <a href="{% url 'news_list' %}">📰 НОВОСТИ</a>
+        <a href="{% url 'characters_list' %}">📜 АНКЕТЫ</a>
+       
+
+<a href="/chat/" class="gothic-btn">💬 Чат</a>
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'profile' user.username %}">👤 {{ user.username }}</a>
+            <a href="/accounts/logout/">🚪 ВЫХОД</a>
+        {% else %}
+            <a href="/accounts/login/">⚜ ВХОД</a>
+           
+        {% endif %}
+    </nav>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>:･ﾟ✧:･.☽｡･ﾟ✧:･.:</p>
+        <p style="margin: 10px 0;">LUMIVILLE — Industrial Gothic</p>
+        <p>↼·↼☬╾☾·※·☽╼☬⇀·⇀·</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Делаем все изображения в контенте адаптивными
+        const images = document.querySelectorAll('.news-detail-content img');
+        images.forEach(function(img) {
+            img.removeAttribute('width');
+            img.removeAttribute('height');
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+        });
+    });
+        // Плавное появление элементов
+        const fadeElements = document.querySelectorAll('.fade-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+        fadeElements.forEach(el => observer.observe(el));
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
