@@ -10,3 +10,4 @@ sqlparse==0.4.4
 typing-extensions==4.10.0
 twisted==24.3.0
 zope.interface==6.2
+djangorestframework>=3.14.0
