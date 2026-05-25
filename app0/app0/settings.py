@@ -26,9 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'app0.chat',  # ← ИСПРАВЛЕНО: было 'chat', стало 'app0.chat'
+    'app0.chat',  # ← ТОЛЬКО ЭТА СТРОКА, без отдельного 'chat'
     'rest_framework',
-    'app0.chat',
     'ckeditor',
     'ckeditor_uploader',
     'allauth',
