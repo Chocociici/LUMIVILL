@@ -11,3 +11,5 @@ typing-extensions==4.10.0
 twisted==24.3.0
 zope.interface==6.2
 djangorestframework>=3.14.0
+django-ckeditor>=6.7.0
+django-allauth>=0.63.0
