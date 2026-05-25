@@ -45,7 +45,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'app0.urls'
+ROOT_URLCONF = 'app0.app0.urls'
 
 TEMPLATES = [
     {
