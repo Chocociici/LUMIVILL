@@ -18,11 +18,10 @@ urlpatterns = [
     path('character/<int:pk>/edit/', views.edit_character, name='edit_character'),
     path('character/<int:pk>/delete/', views.delete_character, name='delete_character'),
     path('character/<int:character_id>/comment/', views.add_comment, name='add_comment'),
-    path('chat/', include('chat.urls')),
-    path('', include('chat.urls')),
+    path('chat/', include('app0.chat.urls')),  # ← ИСПРАВЛЕНО: было 'chat.urls'
+    path('', include('app0.chat.urls')),       # ← ИСПРАВЛЕНО: было 'chat.urls'
     path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
     
-    # ВАЖНО: profile/edit/ ДОЛЖЕН БЫТЬ ПЕРЕД profile/<str:username>/
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/<str:username>/', views.profile_view, name='profile'),
     
