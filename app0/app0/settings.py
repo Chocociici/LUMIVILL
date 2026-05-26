@@ -26,12 +26,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'app0.chat',  # ← ТОЛЬКО ЭТА СТРОКА, без отдельного 'chat'
+    'app0.chat',
     'rest_framework',
     'ckeditor',
     'ckeditor_uploader',
     'allauth',
     'allauth.account',
+    'app0',  # <--- ЭТО САМОЕ ВАЖНОЕ ДОБАВИТЬ
 ]
 
 MIDDLEWARE = [
