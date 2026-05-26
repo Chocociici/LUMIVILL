@@ -14,8 +14,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-loca
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']  # Для Render
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'https://yourdomain.com',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -26,17 +29,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
-    'app0.chat',
+    'chat',
     'rest_framework',
     'ckeditor',
     'ckeditor_uploader',
     'allauth',
     'allauth.account',
-    'app0',  # <--- ЭТО САМОЕ ВАЖНОЕ ДОБАВИТЬ
+    'app0',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -46,7 +50,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'app0.app0.urls'
+ROOT_URLCONF = 'app0.urls'
 
 TEMPLATES = [
     {
@@ -58,6 +62,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -100,8 +105,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'app0' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'app0' / 'media'  # ← ИСПРАВИТЬ
+MEDIA_ROOT = BASE_DIR.parent / 'media'
 
 # CKEditor
 CKEDITOR_UPLOAD_PATH = 'uploads/'
@@ -128,6 +135,14 @@ CHANNEL_LAYERS = {
     },
 }
 
-# Дополнительные настройки
+# Additional settings
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Security
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG

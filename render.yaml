@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: armor-web
+    env: python
+    plan: standard
+    buildCommand: bash build.sh
+    startCommand: cd app0 && daphne -b 0.0.0.0 -p $PORT app0.asgi:application
+    envVars:
+      - key: DEBUG
+        value: false
+      - key: DJANGO_SETTINGS_MODULE
+        value: app0.settings
+      - key: PYTHONUNBUFFERED
+        value: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: armor.onrender.com
+      - key: SECURE_SSL_REDIRECT
+        value: true
+      - key: SESSION_COOKIE_SECURE
+        value: true
+      - key: CSRF_COOKIE_SECURE
+        value: true
+
+  - type: background_worker
+    name: armor-chat-server
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python chat_server.py
+    envVars:
+      - key: CHAT_PORT
+        value: "3001"
+      - key: DEBUG
+        value: false
+      - key: PYTHONUNBUFFERED
+        value: true
+
+  - type: pserv
+    name: armor-db
+    env: postgres
+    plan: standard
+    ipAllowList: []
+    postgresVersion: "15"

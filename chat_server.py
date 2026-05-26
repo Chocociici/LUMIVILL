@@ -13,7 +13,7 @@ user_roles = {'ANGELINA': 'admin', 'admin': 'admin', 'Добрая Вискаш�
 message_history = []
 MAX_HISTORY = 200
 unread_messages = {}
-notification_history = []  # Храним уведомления
+notification_history = []
 
 BOT_PHRASES = [
     '🌸 Добро пожаловать, {name}! ✨',
@@ -21,7 +21,7 @@ BOT_PHRASES = [
     '🫂 Ооо, {name} зашёл! 🎉',
 ]
 
-STATIC_DIR = os.path.join(os.path.dirname(__file__), 'app0', 'static', 'chat', 'uploads')
+STATIC_DIR = os.path.join(os.path.dirname(__file__), 'app0', 'app0', 'static', 'chat', 'uploads')
 os.makedirs(STATIC_DIR, exist_ok=True)
 
 def save_to_history(msg):
@@ -83,7 +83,6 @@ async def handler(websocket, path):
                         'unread': unread_messages[username]
                     }))
                 
-                # Отправляем историю уведомлений
                 for notif in notification_history:
                     if notif['username'] == username:
                         await websocket.send(json.dumps({
@@ -332,8 +331,9 @@ async def broadcast_users():
     await broadcast({'type': 'users', 'users': users_list})
 
 async def main():
-    async with websockets.serve(handler, "0.0.0.0", 3001):
-        print("✅ Чат сервер запущен на порту 3001")
+    port = int(os.environ.get('PORT', os.environ.get('CHAT_PORT', 3001)))
+    async with websockets.serve(handler, "0.0.0.0", port):
+        print(f"✅ Чат сервер запущен на порту {port}")
         await asyncio.Future()
 
 if __name__ == "__main__":
