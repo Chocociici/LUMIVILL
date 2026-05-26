@@ -98,10 +98,10 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'app0' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'app0' / 'media'  # ← ИСПРАВИТЬ
 
 # CKEditor
 CKEDITOR_UPLOAD_PATH = 'uploads/'
